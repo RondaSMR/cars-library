@@ -15,13 +15,13 @@ type HttpServer struct {
 }
 
 type AppConfig struct {
-	PathConfig  string `env:"PATH_CONFIG"`
-	ServiceName string `env:"SERVICE_NAME" yaml:"serviceName"`
-	Debug       bool   `env:"DEBUG" yaml:"debug"`
-	//RabbitMQ       rabbitConfig `yaml:"rabbitMQ"` 					TODO
-	//Queues         queues       `yaml:"queues"` 						TODO
-	PGStorage  pgStorage  `yaml:"pgStorage"`
-	HTTPServer HttpServer `yaml:"http_server"`
+	PathConfig  string       `env:"PATH_CONFIG"`
+	ServiceName string       `env:"SERVICE_NAME" yaml:"serviceName"`
+	Debug       bool         `env:"DEBUG" yaml:"debug"`
+	RabbitMQ    rabbitConfig `yaml:"rabbitMQ"`
+	Queues      queues       `yaml:"queues"`
+	PGStorage   pgStorage    `yaml:"pgStorage"`
+	HTTPServer  HttpServer   `yaml:"http_server"`
 }
 
 type queues struct {
