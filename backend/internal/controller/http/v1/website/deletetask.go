@@ -14,7 +14,23 @@ func (r router) DeleteDrawing(c *gin.Context) {
 		return
 	}
 
-	if err := r.taskUsecase.DeleteDrawing(c.Request.Context(), drawingID); err != nil {
+	if err := r.drawingUsecase.DeleteDrawing(c.Request.Context(), drawingID); err != nil {
+		apperor.ErrInternalSystem.JsonResponse(c, err)
+		return
+	}
+
+	c.Status(http.StatusNoContent)
+	return
+}
+
+func (r router) DeleteComment(c *gin.Context) {
+	commentID, err := uuid.Parse(c.Query("comment_id"))
+	if err != nil {
+		apperor.ErrInvalidID.JsonResponse(c, err)
+		return
+	}
+
+	if err := r.commentUsecase.DeleteComment(c.Request.Context(), commentID); err != nil {
 		apperor.ErrInternalSystem.JsonResponse(c, err)
 		return
 	}

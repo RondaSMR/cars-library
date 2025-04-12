@@ -7,27 +7,52 @@ import (
 	"github.com/google/uuid"
 )
 
-type Usecase interface {
+type DrawingUsecase interface {
+	CreateDrawing(ctx context.Context, task *entities.Drawing, fileData []byte) (entities.Drawing, error)
 	GetDrawing(ctx context.Context, id uuid.UUID) (entities.Drawing, error)
 	DeleteDrawing(ctx context.Context, id uuid.UUID) error
 }
 
+type CommentUsecase interface {
+	CreateComment(ctx context.Context, task *entities.NewComment) (entities.NewComment, error)
+	DeleteComment(ctx context.Context, id uuid.UUID) error
+}
+
+type BookUsecase interface {
+	// TODO: implement me
+}
+
 type router struct {
-	taskUsecase Usecase
+	drawingUsecase DrawingUsecase
+	commentUsecase CommentUsecase
+	bookUsecase    BookUsecase
 }
 
 func Router(
 	ginGroup *gin.RouterGroup,
-	taskUsecase Usecase,
+	drawingUsecase DrawingUsecase,
+	commentUsecase CommentUsecase,
+	bookUsecase BookUsecase,
 	user string,
 	pass string,
 ) {
-	r := router{taskUsecase: taskUsecase}
+	drawingRouter := router{drawingUsecase: drawingUsecase}
+	commentRouter := router{commentUsecase: commentUsecase}
+	//bookRouter := router{bookUsecase: bookUsecase}
 
 	ginGroup.Use(gin.BasicAuth(gin.Accounts{
 		user: pass,
 	}))
 
-	// TODO: ginGroup.(POST, GET, DELETE)
-	ginGroup.GET("", r.GetDrawing)
+	// For Drawings
+	ginGroup.POST("/drawing", drawingRouter.CreateDrawing)
+	ginGroup.GET("/drawing", drawingRouter.GetDrawing)
+	ginGroup.DELETE("/drawing", drawingRouter.DeleteDrawing)
+
+	// For Comments
+	ginGroup.POST("/comment", commentRouter.CreateComment)
+	ginGroup.DELETE("/comment", commentRouter.DeleteComment)
+
+	// For Books
+	// TODO: implement me
 }

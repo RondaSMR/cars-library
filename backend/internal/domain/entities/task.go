@@ -22,3 +22,13 @@ type Drawing struct {
 	UploadedBy time.Time
 	Comments   []Comment
 }
+
+type NewComment struct {
+	CommID    uuid.UUID
+	UserID    uuid.UUID
+	BookID    uuid.UUID
+	DrawingID uuid.UUID
+	Username  string
+	Content   string
+	CreatedAt time.Time
+}

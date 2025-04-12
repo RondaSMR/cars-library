@@ -8,7 +8,7 @@ create table drawings (
 );
 
 create table comments (
-    id uuid primary key default ger_random_uuid(),
+    id uuid primary key default gen_random_uuid(),
     user_id uuid,
     book_id uuid,
     drawing_id uuid,

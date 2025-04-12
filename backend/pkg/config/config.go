@@ -22,10 +22,19 @@ type AppConfig struct {
 	Queues      queues       `yaml:"queues"`
 	PGStorage   pgStorage    `yaml:"pgStorage"`
 	HTTPServer  HttpServer   `yaml:"http_server"`
+	S3          s3storage    `yaml:"s3_storage"`
 }
 
 type queues struct {
 	InfoMessage string `env:"INFO_MESSAGES_QUERY" yaml:"infoMessages"`
+}
+
+type s3storage struct {
+	Endpoint   string `env:"S3_ENDPOINT" yaml:"endpoint"`
+	Region     string `env:"S3_REGION" yaml:"region"`
+	AccessKey  string `env:"S3_ACCESS_KEY" yaml:"accessKey"`
+	SecretKey  string `env:"S3_SECRET_KEY" yaml:"secretKey"`
+	BucketName string `env:"S3_BUCKET" yaml:"bucket"`
 }
 
 type rabbitConfig struct {

@@ -1,20 +1,10 @@
 package rabbitconnector
 
 import (
-	"fmt"
 	"context"
+	"fmt"
 	amqp "github.com/rabbitmq/amqp091-go"
 	"go.uber.org/zap"
-)
-
-package rabbitconnector
-
-import (
-"context"
-"fmt"
-
-amqp "github.com/rabbitmq/amqp091-go"
-"go.uber.org/zap"
 )
 
 const (
@@ -385,4 +375,3 @@ func (c RabbitConnector) Publish(
 		config.publishConfig.publishing,
 	)
 }
-

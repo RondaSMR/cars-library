@@ -17,7 +17,7 @@ func (r router) GetDrawing(c *gin.Context) {
 		return
 	}
 
-	drawing, err := r.taskUsecase.GetDrawing(c.Request.Context(), drawingID)
+	drawing, err := r.drawingUsecase.GetDrawing(c.Request.Context(), drawingID)
 	if err != nil {
 		if errors.Is(err, apperor.ErrRepoNotFound) {
 			apperor.ErrNotFound.JsonResponse(c, err)

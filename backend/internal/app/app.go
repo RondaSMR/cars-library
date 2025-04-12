@@ -2,9 +2,14 @@ package app
 
 import (
 	"backend/internal/controller/http/v1/website"
-	"backend/internal/domain/usecases/task"
-	task2 "backend/internal/repository/task/drawing"
+	bookTask "backend/internal/domain/usecases/book"
+	commentTask "backend/internal/domain/usecases/comment"
+	drawingTask "backend/internal/domain/usecases/drawing"
+	bookRepo "backend/internal/repository/task/book"
+	commentRepo "backend/internal/repository/task/comment"
+	drawingRepo "backend/internal/repository/task/drawing"
 	"backend/pkg/config"
+	"backend/pkg/connectors/S3connector"
 	"backend/pkg/connectors/pgconnector"
 	"backend/pkg/connectors/rabbitconnector"
 	"context"
@@ -27,6 +32,7 @@ const (
 
 func NewApp(config config.AppConfig) error {
 
+	// Инициализация PostgreSQL
 	connectorConfig, err := pgconnector.CreateConfig(&pgconnector.ConnectionConfig{
 		Host:     config.PGStorage.Host,
 		Port:     fmt.Sprint(config.PGStorage.Port),
@@ -49,6 +55,20 @@ func NewApp(config config.AppConfig) error {
 		pgStorage.CloseConnection()
 	}()
 
+	// Инициализация S3
+	zap.L().Info("initialize S3 Storage...")
+	s3Connector, err := S3connector.NewS3Client(S3connector.S3Config{
+		Endpoint:  config.S3.Endpoint,
+		Region:    config.S3.Region,
+		AccessKey: config.S3.AccessKey,
+		SecretKey: config.S3.SecretKey,
+		Bucket:    config.S3.BucketName,
+	})
+	if err != nil {
+		return fmt.Errorf("initialize s3 client: %w", err)
+	}
+
+	// Инициализация RabbitMQ
 	zap.L().Info("Initializing rabbitMQ...")
 	rabbitMQ, err := rabbitconnector.NewConnector(&rabbitconnector.RabbitConfig{
 		Host:     config.RabbitMQ.Host,
@@ -66,6 +86,7 @@ func NewApp(config config.AppConfig) error {
 		}
 	}()
 
+	// Настройка роутера
 	router := gin.New()
 
 	if config.Debug {
@@ -79,7 +100,9 @@ func NewApp(config config.AppConfig) error {
 	router.Use(otelgin.Middleware("task-service"))
 	routersInit(
 		router,
-		task.NewUseCase(task2.NewRepository(pgStorage), rabbitMQ, config.Queues.InfoMessage),
+		drawingTask.NewUseCase(drawingRepo.NewRepository(pgStorage), rabbitMQ, s3Connector, config.S3.BucketName, config.Queues.InfoMessage),
+		commentTask.NewUseCase(commentRepo.NewRepository(pgStorage), rabbitMQ, config.Queues.InfoMessage),
+		bookTask.NewUseCase(bookRepo.NewRepository(pgStorage), rabbitMQ, config.Queues.InfoMessage),
 		config.HTTPServer,
 	)
 
@@ -110,8 +133,10 @@ func NewApp(config config.AppConfig) error {
 
 func routersInit(
 	router *gin.Engine,
-	usecase website.Usecase,
+	drawingCase website.DrawingUsecase,
+	commentCase website.CommentUsecase,
+	bookCase website.BookUsecase,
 	srv config.HttpServer,
 ) {
-	website.Router(router.Group("cars_library"), usecase, srv.User, srv.Pass)
+	website.Router(router.Group("cars_library"), drawingCase, commentCase, bookCase, srv.User, srv.Pass)
 }
