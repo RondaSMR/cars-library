@@ -56,6 +56,8 @@ func (r router) CreateDrawing(c *gin.Context) {
 	c.JSON(http.StatusCreated, utils.GenerateResponse(nil, taskapi.AdapterEntityToHttpDrawing(drawing)))
 }
 
+// -----------------------------------------------
+
 func (r router) CreateComment(c *gin.Context) {
 	var taskInput taskapi.NewComment
 	if err := c.ShouldBindJSON(&taskInput); err != nil {
@@ -72,4 +74,52 @@ func (r router) CreateComment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusCreated, utils.GenerateResponse(nil, taskapi.AdapterNewEntityToHttpComment(comment)))
+}
+
+// -----------------------------------------------
+
+func (r router) CreateBook(c *gin.Context) {
+	// Получаем JSON как строку из формы
+	jsonData := c.PostForm("json")
+
+	// Декодируем JSON в структуру
+	var taskInput taskapi.Book
+	if err := json.Unmarshal([]byte(jsonData), &taskInput); err != nil {
+		apperor.ErrBadRequest.JsonResponse(c, err)
+		return
+	}
+
+	// Получаем файл (две переменные: header и error)
+	header, err := c.FormFile("book")
+	if err != nil {
+		apperor.ErrBadRequest.JsonResponse(c, err)
+		return
+	}
+
+	// Открываем сам файл
+	src, err := header.Open()
+	if err != nil {
+		apperor.ErrInternalSystem.JsonResponse(c, err)
+		return
+	}
+	defer src.Close()
+
+	// Читаем в []byte
+	fileData, err := io.ReadAll(src)
+	if err != nil {
+		apperor.ErrInternalSystem.JsonResponse(c, err)
+		return
+	}
+
+	// Конвертируем в сущность
+	pointerTask := taskapi.AdapterHttpBookToEntity(taskInput)
+
+	// Передаём структуру и файл в usecase
+	book, err := r.bookUsecase.CreateBook(c.Request.Context(), &pointerTask, fileData)
+	if err != nil {
+		apperor.ErrInternalSystem.JsonResponse(c, err)
+		return
+	}
+
+	c.JSON(http.StatusCreated, utils.GenerateResponse(nil, taskapi.AdapterEntityToHttpBook(book)))
 }

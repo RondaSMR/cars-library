@@ -7,11 +7,12 @@ import (
 )
 
 type Drawing struct {
-	DrawingID  uuid.UUID `json:"drawing_id,omitempty"`
+	DrawingID  uuid.UUID `json:"drawing_id"`
 	Title      string    `json:"title"`
 	FileUrl    string    `json:"file_url"`
 	CarModel   string    `json:"car_model"`
 	Category   string    `json:"category"`
+	UserID     uuid.UUID `json:"user_id"`
 	UploadedBy time.Time `json:"uploaded_by,omitempty"`
 	Comments   []Comment `json:"comments,omitempty"`
 }
@@ -34,6 +35,7 @@ func AdapterEntityToHttpDrawing(drawing entities.Drawing) Drawing {
 		FileUrl:    drawing.FileUrl,
 		CarModel:   drawing.CarModel,
 		Category:   drawing.Category,
+		UserID:     drawing.UserID,
 		UploadedBy: drawing.UploadedBy,
 		Comments:   comments,
 	}
@@ -46,6 +48,7 @@ func AdapterHttpDrawingToEntity(drawing Drawing) entities.Drawing {
 		FileUrl:    drawing.FileUrl,
 		CarModel:   drawing.CarModel,
 		Category:   drawing.Category,
+		UserID:     drawing.UserID,
 		UploadedBy: drawing.UploadedBy,
 	}
 }

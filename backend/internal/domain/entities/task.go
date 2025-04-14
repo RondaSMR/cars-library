@@ -19,6 +19,7 @@ type Drawing struct {
 	FileUrl    string
 	CarModel   string
 	Category   string
+	UserID     uuid.UUID
 	UploadedBy time.Time
 	Comments   []Comment
 }
@@ -31,4 +32,15 @@ type NewComment struct {
 	Username  string
 	Content   string
 	CreatedAt time.Time
+}
+
+type Book struct {
+	BookID     uuid.UUID
+	Title      string
+	FileUrl    string
+	CarModel   string
+	Category   string
+	UserID     uuid.UUID
+	UploadedBy time.Time
+	Comments   []Comment
 }

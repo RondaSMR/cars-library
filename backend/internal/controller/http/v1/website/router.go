@@ -19,7 +19,9 @@ type CommentUsecase interface {
 }
 
 type BookUsecase interface {
-	// TODO: implement me
+	CreateBook(ctx context.Context, task *entities.Book, fileData []byte) (entities.Book, error)
+	GetBook(ctx context.Context, id uuid.UUID) (entities.Book, error)
+	DeleteBook(ctx context.Context, id uuid.UUID) error
 }
 
 type router struct {
@@ -38,7 +40,7 @@ func Router(
 ) {
 	drawingRouter := router{drawingUsecase: drawingUsecase}
 	commentRouter := router{commentUsecase: commentUsecase}
-	//bookRouter := router{bookUsecase: bookUsecase}
+	bookRouter := router{bookUsecase: bookUsecase}
 
 	ginGroup.Use(gin.BasicAuth(gin.Accounts{
 		user: pass,
@@ -54,5 +56,7 @@ func Router(
 	ginGroup.DELETE("/comment", commentRouter.DeleteComment)
 
 	// For Books
-	// TODO: implement me
+	ginGroup.POST("/book", bookRouter.CreateBook)
+	ginGroup.GET("/book", bookRouter.GetBook)
+	ginGroup.DELETE("/book", bookRouter.DeleteBook)
 }

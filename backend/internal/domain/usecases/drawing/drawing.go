@@ -44,16 +44,16 @@ func NewUseCase(
 }
 
 func (u Usecase) CreateDrawing(ctx context.Context, task *entities.Drawing, fileData []byte) (entities.Drawing, error) {
-	task.UploadedBy = time.Now()
-
 	if err := u.messageQueue.Publish(
 		ctx,
 		u.infoMessageQueue,
 		[]byte(fmt.Sprintf(
-			"Smbd create new drawing: %v", task.DrawingID)),
+			"%v create new drawing", task.UserID)),
 	); err != nil {
 		return entities.Drawing{}, err
 	}
+
+	task.UploadedBy = time.Now()
 
 	// Создание имени для S3 и базы данных
 	fileID := uuid.New()
@@ -63,7 +63,7 @@ func (u Usecase) CreateDrawing(ctx context.Context, task *entities.Drawing, file
 	// Загрузка файла в S3
 	fileURL, err := u.s3Client.UploadFile(ctx, fileName, fileData)
 	if err != nil {
-		return entities.Drawing{}, fmt.Errorf("failed to upload file to S3: %w", err)
+		return entities.Drawing{}, fmt.Errorf("failed to upload drawing to S3: %w", err)
 	}
 	task.FileUrl = fileURL
 
@@ -71,7 +71,7 @@ func (u Usecase) CreateDrawing(ctx context.Context, task *entities.Drawing, file
 	if err != nil {
 		// Если ошибка при отправке в базу данных, удаляем файл из S3
 		if s3err := u.s3Client.DeleteFile(ctx, fileName); s3err != nil {
-			return entities.Drawing{}, fmt.Errorf("%w and failed to delete file from S3: %w", err, s3err)
+			return entities.Drawing{}, fmt.Errorf("%w and failed to delete drawing from S3: %w", err, s3err)
 		}
 
 		return returnedTask, err
@@ -110,7 +110,7 @@ func (u Usecase) DeleteDrawing(ctx context.Context, id uuid.UUID) error {
 	// Удаляем файл из S3
 	fileName := id.String()
 	if err := u.s3Client.DeleteFile(ctx, fileName); err != nil {
-		return fmt.Errorf("failed to delete file from S3: %w", err)
+		return fmt.Errorf("failed to delete drawing from S3: %w", err)
 	}
 
 	return nil

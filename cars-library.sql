@@ -4,6 +4,17 @@ create table drawings (
     file_url text,
     car_model text,
     category text,
+    user_id uuid,
+    uploaded_by text
+);
+
+create table books (
+    id uuid primary key default gen_random_uuid(),
+    title text,
+    file_url text,
+    car_model text,
+    category text,
+    user_id uuid,
     uploaded_by text
 );
 

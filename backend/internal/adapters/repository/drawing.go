@@ -12,6 +12,7 @@ type Drawing struct {
 	FileUrl    sql.NullString `db:"file_url"`
 	CarModel   sql.NullString `db:"car_model"`
 	Category   sql.NullString `db:"category"`
+	UserID     uuid.NullUUID  `db:"user_id"`
 	UploadedBy sql.NullTime   `db:"uploaded_by"`
 	Comments   []Comment
 }
@@ -23,6 +24,7 @@ func AdapterRepoDrawingToEntity(drawing Drawing) entities.Drawing {
 		FileUrl:    drawing.FileUrl.String,
 		CarModel:   drawing.CarModel.String,
 		Category:   drawing.Category.String,
+		UserID:     drawing.UserID.UUID,
 		UploadedBy: drawing.UploadedBy.Time,
 	}
 }

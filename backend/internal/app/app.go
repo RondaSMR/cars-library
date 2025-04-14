@@ -102,7 +102,7 @@ func NewApp(config config.AppConfig) error {
 		router,
 		drawingTask.NewUseCase(drawingRepo.NewRepository(pgStorage), rabbitMQ, s3Connector, config.S3.BucketName, config.Queues.InfoMessage),
 		commentTask.NewUseCase(commentRepo.NewRepository(pgStorage), rabbitMQ, config.Queues.InfoMessage),
-		bookTask.NewUseCase(bookRepo.NewRepository(pgStorage), rabbitMQ, config.Queues.InfoMessage),
+		bookTask.NewUseCase(bookRepo.NewRepository(pgStorage), rabbitMQ, s3Connector, config.S3.BucketName, config.Queues.InfoMessage),
 		config.HTTPServer,
 	)
 

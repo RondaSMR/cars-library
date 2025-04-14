@@ -13,7 +13,7 @@ import (
 
 func (r Repository) GetDrawing(ctx context.Context, id uuid.UUID) (entities.Drawing, error) {
 	drawingRow, err := r.pool.Query(ctx, `
-		select id, title, file_url, car_model, category, uploaded_by
+		select id, title, file_url, car_model, category, user_id, uploaded_by
 		from drawings
 		where drawing_id = $1
 	`, id)
