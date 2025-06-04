@@ -136,8 +136,9 @@ func defaultPublishConfig(queryName string, body []byte) queueConfig {
 		mandatory:  false,
 		immediate:  false,
 		publishing: amqp.Publishing{
-			ContentType: textContentType,
-			Body:        body,
+			ContentType:  textContentType,
+			Body:         body,
+			DeliveryMode: amqp.Transient,
 		},
 	}
 	return conf
@@ -292,9 +293,9 @@ func (c RabbitConnector) Consume(
 
 	q, err := c.GetChannel().QueueDeclare(
 		config.queueName,
-		config.durableQueue,
+		true,  // durable: очередь сохраняется после перезапуска RabbitMQ
+		false, // autoDelete: очередь НЕ удаляется после отключения потребителей
 		config.exclusive,
-		config.autoAck,
 		config.noWait,
 		config.args,
 	)
@@ -302,20 +303,14 @@ func (c RabbitConnector) Consume(
 		return fmt.Errorf("error with queue declare: %w", err)
 	}
 
-	if config.qos != nil {
-		if err = c.channel.Qos(
-			config.qos.prefetchCount,
-			config.qos.prefetchSize,
-			config.qos.global,
-		); err != nil {
-			return fmt.Errorf("error with qos: %w", err)
-		}
+	if err := c.channel.Qos(1, 0, false); err != nil {
+		return fmt.Errorf("error with queue Qos: %w", err)
 	}
 
 	delivery, err := c.GetChannel().Consume(
 		q.Name,
 		config.consumer,
-		config.autoAck,
+		false,
 		config.exclusive,
 		config.noLocal,
 		config.noWait,
@@ -351,25 +346,25 @@ func (c RabbitConnector) Publish(
 		config = opt.apply(config)
 	}
 
-	q, err := c.GetChannel().QueueDeclare(
-		config.queueName,
-		config.durableQueue,
-		false,
-		false,
-		config.noWait,
-		config.args,
-	)
-	if err != nil {
-		return fmt.Errorf("error with queue declare: %w", err)
-	}
+	//q, err := c.GetChannel().QueueDeclare(
+	//	config.queueName,
+	//	true,
+	//	false,
+	//	false,
+	//	config.noWait,
+	//	config.args,
+	//)
+	//if err != nil {
+	//	return fmt.Errorf("error with queue declare: %w", err)
+	//}
 
-	zap.L().Info(fmt.Sprintf("publishing to queue %v", q.Name))
+	//zap.L().Info(fmt.Sprintf("publishing to queue %v", q.Name))
 	zap.L().Info(fmt.Sprintf("publishing to queue %v", config.queueName))
 
 	return c.channel.PublishWithContext(
 		ctx,
 		"",
-		q.Name,
+		config.queueName,
 		config.publishConfig.mandatory,
 		config.publishConfig.immediate,
 		config.publishConfig.publishing,

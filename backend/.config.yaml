@@ -1,0 +1,25 @@
+PGStorage:
+  Host: localhost
+  Port: 5432
+  User: ronda
+  Pass: mypass
+  DB: cars-library@localhost
+
+RabbitMQ:
+  Host: localhost
+  Port: 15672
+  Username: guest
+  Password: guest
+  Path: /
+
+S3:
+  Endpoint: https://storage.yandexcloud.net
+  Region: ru-central1
+  AccessKey: your_yandex_access_key
+  SecretKey: your_yandex_secret_key
+  BucketName: your_bucket_name
+
+HTTPServer:
+  Address: ":8080"
+  User: admin
+  Pass: admin

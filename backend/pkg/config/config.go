@@ -88,7 +88,7 @@ func (c *AppConfig) Validate() error {
 	if c.PGStorage.Host == "" {
 		return fmt.Errorf("pg repository host is not set")
 	}
-	// TODO: InfoMessages
+	//TODO: InfoMessages
 	//if c.Queues.InfoMessages == "" {
 	//	return fmt.Errorf("info messages query is not set")
 	//}
